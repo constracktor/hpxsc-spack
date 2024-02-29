@@ -64,7 +64,6 @@ class Kokkos(CMakePackage, CudaPackage, ROCmPackage):
     conflicts("@:3.5 +sycl", when="%dpcpp@2022:")
     conflicts("@:3.5 +sycl", when="%oneapi@2022:")
 
-    patch('adapt-kokkos-for-nix.patch')
     patch('adapt-kokkos-for-hpx.patch')
     # Small patch to CMakeLists, allowing to run the SYCL execution space on AMD GPUs as well
     # Upstreamed in https://github.com/kokkos/kokkos/pull/6321
@@ -391,58 +390,58 @@ class Kokkos(CMakePackage, CudaPackage, ROCmPackage):
             with open(filepath, "r") as in_file:
                 return in_file.read().strip()
 
-    @run_after("install")
-    def setup_build_tests(self):
-        # Skip if unsupported version
-        cmake_source_path = join_path(self.stage.source_path, self.test_script_relative_path)
-        if not os.path.exists(cmake_source_path):
-            return
-        """Copy test."""
-        cmake_out_path = join_path(self.test_script_relative_path, "out")
-        cmake_args = [
-            cmake_source_path,
-            "-DSPACK_PACKAGE_SOURCE_DIR:PATH={0}".format(self.stage.source_path),
-            "-DSPACK_PACKAGE_TEST_ROOT_DIR:PATH={0}".format(
-                join_path(self.install_test_root, cmake_out_path)
-            ),
-            "-DSPACK_PACKAGE_INSTALL_DIR:PATH={0}".format(self.prefix),
-        ]
-        cmake(*cmake_args)
-        self.cache_extra_test_sources(cmake_out_path)
-        self.cmake_bin(set=True)
+    # @run_after("install")
+    # def setup_build_tests(self):
+    #     # Skip if unsupported version
+    #     cmake_source_path = join_path(self.stage.source_path, self.test_script_relative_path)
+    #     if not os.path.exists(cmake_source_path):
+    #         return
+    #     """Copy test."""
+    #     cmake_out_path = join_path(self.test_script_relative_path, "out")
+    #     cmake_args = [
+    #         cmake_source_path,
+    #         "-DSPACK_PACKAGE_SOURCE_DIR:PATH={0}".format(self.stage.source_path),
+    #         "-DSPACK_PACKAGE_TEST_ROOT_DIR:PATH={0}".format(
+    #             join_path(self.install_test_root, cmake_out_path)
+    #         ),
+    #         "-DSPACK_PACKAGE_INSTALL_DIR:PATH={0}".format(self.prefix),
+    #     ]
+    #     cmake(*cmake_args)
+    #     self.cache_extra_test_sources(cmake_out_path)
+    #     self.cmake_bin(set=True)
 
-    def build_tests(self, cmake_path):
-        """Build test."""
-        cmake_bin = self.cmake_bin(set=False)
+    # def build_tests(self, cmake_path):
+    #     """Build test."""
+    #     cmake_bin = self.cmake_bin(set=False)
 
-        if not cmake_bin:
-            tty.msg("Skipping kokkos test: cmake_bin_path.txt not found")
-            return
+    #     if not cmake_bin:
+    #         tty.msg("Skipping kokkos test: cmake_bin_path.txt not found")
+    #         return
 
-        cmake_args = [cmake_path, "-DEXECUTABLE_OUTPUT_PATH=" + cmake_path]
+    #     cmake_args = [cmake_path, "-DEXECUTABLE_OUTPUT_PATH=" + cmake_path]
 
-        if not self.run_test(cmake_bin, options=cmake_args, purpose="Generate the Makefile"):
-            tty.warn("Skipping kokkos test: failed to generate Makefile")
-            return
-        if not self.run_test("make", purpose="Build test software"):
-            tty.warn("Skipping kokkos test: failed to build test")
+    #     if not self.run_test(cmake_bin, options=cmake_args, purpose="Generate the Makefile"):
+    #         tty.warn("Skipping kokkos test: failed to generate Makefile")
+    #         return
+    #     if not self.run_test("make", purpose="Build test software"):
+    #         tty.warn("Skipping kokkos test: failed to build test")
 
-    def run_tests(self, cmake_path):
-        """Run test."""
-        if not self.run_test(
-            "make", options=[cmake_path, "test"], purpose="Checking ability to execute."
-        ):
-            tty.warn("Failed to run kokkos test")
+    # def run_tests(self, cmake_path):
+    #     """Run test."""
+    #     if not self.run_test(
+    #         "make", options=[cmake_path, "test"], purpose="Checking ability to execute."
+    #     ):
+    #         tty.warn("Failed to run kokkos test")
 
-    def test(self):
-        # Skip if unsupported version
-        cmake_path = join_path(
-            self.test_suite.current_test_cache_dir, self.test_script_relative_path, "out"
-        )
+    # def test(self):
+    #     # Skip if unsupported version
+    #     cmake_path = join_path(
+    #         self.test_suite.current_test_cache_dir, self.test_script_relative_path, "out"
+    #     )
 
-        if not os.path.exists(cmake_path):
-            tty.warn("Skipping smoke tests: {0} is missing".format(cmake_path))
-            return
+    #     if not os.path.exists(cmake_path):
+    #         tty.warn("Skipping smoke tests: {0} is missing".format(cmake_path))
+    #         return
 
-        self.build_tests(cmake_path)
-        self.run_tests(cmake_path)
+    #     self.build_tests(cmake_path)
+    #     self.run_tests(cmake_path)

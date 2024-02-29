@@ -313,12 +313,6 @@ class Hpx(CMakePackage, CudaPackage, ROCmPackage):
             # Pass required target flags to HPX (will be appended when compiling SYCL src files)
             args += [self.define("HPX_WITH_SYCL_FLAGS", sycl_target_flags)]
 
-        if spec.satisfies("~async_gpu_futures"):
-            tty.warn("Building HPX with disabled asynchronous CUDA/HIP futures. This "
-                     "can lead to degraded performance and should "
-                     "only be done for certain benchmarks!")
-
-
         # Instrumentation
         args += self.instrumentation_args()
 
