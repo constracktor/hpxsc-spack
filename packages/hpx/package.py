@@ -101,10 +101,6 @@ class Hpx(CMakePackage, CudaPackage, ROCmPackage):
     variant("examples", default=False, description="Build examples")
     variant("async_mpi", default=False, description="Enable MPI Futures.")
     variant("async_cuda", default=False, description="Enable CUDA Futures.")
-    variant("async_gpu_futures", default=True, when="@1.9.1:",
-            description=("GPU futures become synchronous. Disabling this option significantly "
-                         "decreases GPU performance - this only intended for performance experiments!!"))
-    patch("disable_async_gpu_futures.patch", when="@1.9.1: ~async_gpu_futures")
     variant("lci_pp_log", default=False,
             description="Enable the LCI-parcelport-specific logger.")
     variant("lci_pp_pcounter", default=False,
